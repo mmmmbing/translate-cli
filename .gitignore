@@ -1,3 +1,6 @@
 /.vscode
 /build
 /json-subbuild
+/dist
+/translate-cli-windows-x64.zip
+/build_*.log

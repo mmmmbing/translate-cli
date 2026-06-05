@@ -76,3 +76,32 @@ target_link_libraries(translate PRIVATE
     CLI11::CLI11
 )
 
+# --- 安装 / 打包 ---
+# `translate.exe` 在 Windows 上依赖 cpr / curl / zlib 三个动态库
+# (libcpr.dll / libcurl.dll / libzlib.dll). 它们在构建过程中被
+# cpr/curl/zlib 子项目输出到 ${CMAKE_BINARY_DIR} (即 build 目录) 顶层.
+#
+# 由于 FetchContent 拉下来的 zlib 子项目把 install 路径硬编码成
+#   C:/Program Files (x86)/TranslateCLI/...
+# 在 Windows 上直接 `cmake --install build --prefix dist` 会被子项目
+# install 阻断. 因此:
+#   - 顶层 install 规则只注册一个名为 "translate_dist" 的 component,
+#     负责把 translate.exe + 3 个 dll 复制到 ${CMAKE_INSTALL_PREFIX}/bin/.
+#   - 完整发布请用 scripts/release.ps1, 它会直接 cp build/ 顶层
+#     的 4 个文件到 dist/bin/, 完全绕开子项目 install, 简单稳定.
+install(TARGETS translate
+    RUNTIME DESTINATION bin
+    COMPONENT translate_dist
+)
+
+if(WIN32)
+    install(FILES
+        ${CMAKE_BINARY_DIR}/libcpr.dll
+        ${CMAKE_BINARY_DIR}/libcurl.dll
+        ${CMAKE_BINARY_DIR}/libzlib.dll
+        DESTINATION bin
+        OPTIONAL
+        COMPONENT translate_dist
+    )
+endif()
+

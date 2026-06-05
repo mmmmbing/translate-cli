@@ -18,7 +18,9 @@
 .
 ├─ include/        头文件
 ├─ src/            源码
+├─ scripts/        构建 / 打包脚本
 ├─ build/          构建输出目录
+├─ dist/           自包含发布目录 (运行 scripts/release.ps1 后生成)
 └─ CMakeLists.txt  CMake 构建配置
 ```
 
@@ -198,6 +200,54 @@ C:/Users/你的用户名/.translate_cli_config.json
 - 运行前请确保 Ollama 服务可访问
 - 首次构建会下载第三方依赖，时间可能较长
 - 在 Windows + MinGW 环境下，`CMakeLists.txt` 已包含对 curl/zlib 资源编译和编码兼容的修复
+
+## 发布与打包
+
+> `translate.exe` 不是单文件可执行程序，运行时需要 3 个动态库：
+> `libcpr.dll` / `libcurl.dll` / `libzlib.dll`。
+> 把 `translate.exe` 单独拷到其他目录会因找不到 dll 而启动失败。
+
+请使用项目自带的发布脚本，它会把 `translate.exe` 与 3 个 dll 一起打包成自包含目录：
+
+```powershell
+# 在项目根目录 (PowerShell)
+.\scripts\release.ps1
+```
+
+脚本会：
+
+1. `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release`（首次会拉 cpr/curl/zlib/json/cli11）
+2. `cmake --build build -j`
+3. 把 `build/translate.exe` 和 3 个 dll 复制到 `dist/bin/`
+4. 用 `Compress-Archive` 打成 `translate-cli-windows-x64.zip`
+
+完成后 `dist/bin/` 目录结构如下，整个目录拷贝到任意位置都能直接运行：
+
+```text
+dist/bin/
+├─ translate.exe
+├─ libcpr.dll
+├─ libcurl.dll
+└─ libzlib.dll
+```
+
+可选参数：
+
+```powershell
+# 指定生成器
+.\scripts\release.ps1 -Generator "Visual Studio 17 2022"
+
+# 跳过构建, 复用已有 build/
+.\scripts\release.ps1 -SkipBuild
+
+# 自定义输出 zip 路径
+.\scripts\release.ps1 -Output D:\releases\translate-cli.zip
+```
+
+> 为什么脚本不直接用 `cmake --install`？因为 `FetchContent` 拉下来的
+> zlib 子项目把 install 路径硬编码为 `C:/Program Files (x86)/TranslateCLI`，
+> 在 `cmake --install` 时会触发权限错误。脚本改成直接 `Copy-Item` 4 个文件，
+> 简单稳定，不依赖子项目的 install 行为。
 
 ## 后续可扩展方向
 
