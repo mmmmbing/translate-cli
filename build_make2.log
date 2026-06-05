@@ -1,0 +1,18 @@
+[  0%] Built target CLI11
+[ 69%] Built target libcurl_object
+[ 69%] Built target libcurl_shared
+[ 81%] Built target cpr
+[ 81%] Building CXX object CMakeFiles/translate.dir/src/main.cpp.obj
+[ 81%] Building CXX object CMakeFiles/translate.dir/src/ollama_client.cpp.obj
+[ 81%] Building CXX object CMakeFiles/translate.dir/src/openai_client.cpp.obj
+[ 83%] Linking CXX executable translate.exe
+[ 84%] Built target translate
+[ 84%] Generating zlib1rc.obj
+Active code page: 65001
+D:\env\CPP\ucrt64\bin\windres.exe: can't open file `page:': Invalid argument
+E:/project/learningC/translate/build/_deps/zlib-src/win32/zlib1.rc:42: fatal error: when writing output to : Invalid argument
+compilation terminated.
+D:\env\CPP\ucrt64\bin\windres.exe: preprocessing failed.
+mingw32-make[2]: *** [_deps\zlib-build\CMakeFiles\zlib.dir\build.make:73: _deps/zlib-build/zlib1rc.obj] Error 1
+mingw32-make[1]: *** [CMakeFiles\Makefile2:341: _deps/zlib-build/CMakeFiles/zlib.dir/all] Error 2
+mingw32-make: *** [Makefile:135: all] Error 2
