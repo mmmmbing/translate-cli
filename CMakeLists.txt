@@ -62,6 +62,33 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cli11)
 
+# --- Patch zlib-ng windres (预存问题修复) ---
+# cpr 拉来的 zlib-ng 子项目 (MINGW/MSYS/CYGWIN) 调 windres 时
+# 直接把命令写死在 add_custom_command 里, 没有用 ${CMAKE_RC_FLAGS},
+# 因此顶层 set(CMAKE_RC_FLAGS ... --use-temp-file) 注入对它无效.
+# 在 UTF-8 代码页 (65001) 下 windres 默认通过 popen 调预处理器会失败:
+#     windres.exe: can't open file `page:': Invalid argument
+# 这里在 FetchContent 之后给 zlib-ng 的 windres 命令补 --use-temp-file,
+# 走临时文件路径, 一劳永逸. patch 是幂等的, 已包含 --use-temp-file 时不再写入.
+file(GLOB _zlib_cmakelists_paths "${CMAKE_BINARY_DIR}/_deps/zlib-src/CMakeLists.txt")
+if(_zlib_cmakelists_paths)
+    list(GET _zlib_cmakelists_paths 0 _zlib_cmakelists)
+    file(READ "${_zlib_cmakelists}" _zlib_content)
+    set(_zlib_search [==[COMMAND ${CMAKE_RC_COMPILER}
+            -D GCC_WINDRES]==])
+    set(_zlib_replace [==[COMMAND ${CMAKE_RC_COMPILER} --use-temp-file
+            -D GCC_WINDRES]==])
+    string(REPLACE
+        "${_zlib_search}"
+        "${_zlib_replace}"
+        _zlib_patched
+        "${_zlib_content}")
+    if(NOT _zlib_content STREQUAL _zlib_patched)
+        file(WRITE "${_zlib_cmakelists}" "${_zlib_patched}")
+        message(STATUS "Patched zlib-ng CMakeLists.txt: windres +--use-temp-file")
+    endif()
+endif()
+
 # --- 构建目标 ---
 file(GLOB SOURCES "src/*.cpp")
 add_executable(translate ${SOURCES})

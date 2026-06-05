@@ -1,4 +1,4 @@
-# scripts/release.ps1
+﻿# scripts/release.ps1
 # 一键构建并打包自包含的 Windows 发布包.
 #
 # 流程:

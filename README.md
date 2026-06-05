@@ -1,6 +1,6 @@
 # TranslateCLI
 
-基于 Ollama 的命令行翻译工具，使用 C++17、CMake、cpr、nlohmann/json 和 CLI11 实现。
+基于 Ollama 的命令行翻译工具，使用 C++17、CMake、cpr、nlohmann/json 和 CLI11 实现。请确保使用前已安装并运行 Ollama。
 
 ## 功能特性
 
@@ -38,6 +38,13 @@
 - CLI11 2.4.1
 
 ## 构建
+
+### ollama 模型地址
+```powershell
+# 默认模型地址
+ollama create modulname -fo ./Modelfile
+```
+
 
 ### Windows + MinGW Makefiles
 
